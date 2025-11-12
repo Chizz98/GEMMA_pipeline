@@ -15,13 +15,13 @@ def parse_phenotype_file(
     infile_fn: str, 
     delim: str="\t"
     ) -> tuple[list[str], dict[str, list[str]]]:
-    """_summary_
+    """Parses phenonotype file into dict and list of phenotypes
 
-    :param infile_fn: _description_
+    :param infile_fn: Input phenotype file, with sample id as first column, 
+        phenotypes as all other cols. Header should contain phenotype names.
     :type infile_fn: str
-    :param delim: _description_, defaults to "\t"
+    :param delim: Delimiter of phenotype file, defaults to "\t"
     :type delim: str, optional
-    :raises Exception: _description_
     :return: list containting phenotypes, 
         dictionary with sample ids as keys and phenotypes as values
     :rtype: tuple[list[str], dict[str, list[str]]]
@@ -79,13 +79,13 @@ def modify_fam(
     ) -> None:
     """Merges phenotypes and an input fam file into out fam
 
-    :param fam_fn: _description_
+    :param fam_fn: Filename of input fam
     :type fam_fn: str
-    :param pheno_dict: _description_
+    :param pheno_dict: Pheno dict output by parse_phenotype_file
     :type pheno_dict: dict
-    :param phenotypes: _description_
+    :param phenotypes: List of phenotypes
     :type phenotypes: list
-    :param out_fn: _description_
+    :param out_fn: Out filename
     :type out_fn: str
     :return: None, writes merged fam to specified outfile
     :rtype: None
@@ -112,6 +112,7 @@ def modify_fam(
 
 
 def main():
+    # Parse cmd args
     if len(sys.argv) != 3:
             print("Usage: python merge_pheno.py <phenotype_file> <fam_file>")
             sys.exit(1)
@@ -119,12 +120,15 @@ def main():
     pheno_fn = pathlib.Path(sys.argv[1])
     fam_fn = pathlib.Path(sys.argv[2])
 
+    # Construct temporary fam filename
     out_fam_fn = fam_fn.with_name(fam_fn.stem + "_temp" + fam_fn.suffix)
     
     phenotypes, pheno_dict = parse_phenotype_file(pheno_fn)
     modify_fam(fam_fn, pheno_dict, phenotypes, out_fam_fn)
 
+    # Overwrite input fam with temp fam
     shutil.move(out_fam_fn, fam_fn)
+
 
 if __name__ == "__main__":
     main()
