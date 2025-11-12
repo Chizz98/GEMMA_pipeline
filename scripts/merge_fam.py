@@ -6,6 +6,10 @@ Date: 12-11-2025
 Takes a .fam file and a phenotype file, merges phenotype into fam file. 
 """
 
+import shutil
+import sys
+import pathlib
+
 
 def parse_phenotype_file(
     infile_fn: str, 
@@ -73,7 +77,7 @@ def modify_fam(
     phenotypes: list,
     out_fn: str
     ) -> None:
-    """Merges phenotypes into a temporary fam file
+    """Merges phenotypes and an input fam file into out fam
 
     :param fam_fn: _description_
     :type fam_fn: str
@@ -108,13 +112,19 @@ def modify_fam(
 
 
 def main():
-    pheno_fn = r"..\test_files\phenotypes_galore_NA_filtered_pheno_mismatch.txt"
-    fam_fn = r"..\test_files\LKsat_bed_files_het-0.1_v4.fam"
-    out_fam_fn = fam_fn.replace(".fam", "_temp.fam")
+    if len(sys.argv) != 3:
+            print("Usage: python merge_pheno.py <phenotype_file> <fam_file>")
+            sys.exit(1)
+
+    pheno_fn = pathlib.Path(sys.argv[1])
+    fam_fn = pathlib.Path(sys.argv[2])
+
+    out_fam_fn = fam_fn.with_name(fam_fn.stem + "_temp" + fam_fn.suffix)
     
     phenotypes, pheno_dict = parse_phenotype_file(pheno_fn)
-    temp_fam_fn = modify_fam(fam_fn, pheno_dict, phenotypes)
+    modify_fam(fam_fn, pheno_dict, phenotypes, out_fam_fn)
 
+    shutil.move(out_fam_fn, fam_fn)
 
 if __name__ == "__main__":
     main()
