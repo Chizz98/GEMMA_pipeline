@@ -70,11 +70,24 @@ def parse_phenotype_file(
 def modify_fam(
     fam_fn: str,
     pheno_dict: dict,
-    phenotypes: list
-    ) -> str:
+    phenotypes: list,
+    out_fn: str
+    ) -> None:
+    """Merges phenotypes into a temporary fam file
+
+    :param fam_fn: _description_
+    :type fam_fn: str
+    :param pheno_dict: _description_
+    :type pheno_dict: dict
+    :param phenotypes: _description_
+    :type phenotypes: list
+    :param out_fn: _description_
+    :type out_fn: str
+    :return: None, writes merged fam to specified outfile
+    :rtype: None
+    """
     n_pheno = len(phenotypes)
     out_lines = []
-    temp_fam_fn = fam_fn.replace(".fam", "_temp.fam")
 
     with open(fam_fn) as infile:
         for line in infile:
@@ -89,15 +102,15 @@ def modify_fam(
 
             out_lines.append(sample_descriptors + sample_phenotypes)
     
-    with open(temp_fam_fn, "w") as outfile:
+    with open(out_fn, "w") as outfile:
         for line in out_lines:
             outfile.write(" ".join(line) + "\n")
-    return temp_fam_fn
 
 
 def main():
     pheno_fn = r"..\test_files\phenotypes_galore_NA_filtered_pheno_mismatch.txt"
     fam_fn = r"..\test_files\LKsat_bed_files_het-0.1_v4.fam"
+    out_fam_fn = fam_fn.replace(".fam", "_temp.fam")
     
     phenotypes, pheno_dict = parse_phenotype_file(pheno_fn)
     temp_fam_fn = modify_fam(fam_fn, pheno_dict, phenotypes)
