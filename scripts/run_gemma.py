@@ -33,20 +33,21 @@ def run_gemma(param_dict: dict) -> None:
          )
 
 
-def main():
-    if len(sys.argv) != 8:
+def main(argv = None):
+    argv = argv or sys.argv
+    if len(argv) != 8:
             print("Usage: python run_gemma.py <bfiles> <kinship_mat> <maf> "
                   "<missing_threshold> <lmm> <output filename> <phenotype_num>")
             sys.exit(1)
     # Make parameter_dictionary
     gemma_params = {
-        "bfile": sys.argv[1],
-        "k": sys.argv[2],
-        "maf": sys.argv[3],
-        "miss": sys.argv[4],
-        "lmm": sys.argv[5],
-        "o": sys.argv[6],
-        "n": sys.argv[7]
+        "bfile": argv[1],
+        "k": argv[2],
+        "maf": argv[3],
+        "miss": argv[4],
+        "lmm": argv[5],
+        "o": argv[6],
+        "n": argv[7]
     }
 
     # Run gemma
