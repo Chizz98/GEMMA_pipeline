@@ -130,6 +130,8 @@ def main(argv=None):
     # Overwrite input fam with temp fam
     shutil.move(out_fam_fn, fam_fn)
 
+    return phenotypes
+
 
 if __name__ == "__main__":
     main()
