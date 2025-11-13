@@ -29,14 +29,12 @@ def run_gemma(param_dict: dict) -> None:
          gemma_cmd, 
          shell=True, 
          text=False, 
-         check=True,
-         stdout=subprocess.DEVNULL,
-         stderr=subprocess.DEVNULL
+         check=True
          )
 
 
 def main():
-    if len(sys.argv) != 9:
+    if len(sys.argv) != 8:
             print("Usage: python run_gemma.py <bfiles> <kinship_mat> <maf> "
                   "<missing_threshold> <lmm> <output filename> <phenotype_num>")
             sys.exit(1)
