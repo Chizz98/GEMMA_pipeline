@@ -111,14 +111,15 @@ def modify_fam(
             outfile.write(" ".join(line) + "\n")
 
 
-def main():
+def main(argv=None):
+    argv = argv or sys.argv
     # Parse cmd args
-    if len(sys.argv) != 3:
+    if len(argv) != 3:
             print("Usage: python merge_pheno.py <phenotype_file> <fam_file>")
             sys.exit(1)
 
-    pheno_fn = pathlib.Path(sys.argv[1])
-    fam_fn = pathlib.Path(sys.argv[2])
+    pheno_fn = pathlib.Path(argv[1])
+    fam_fn = pathlib.Path(argv[2])
 
     # Construct temporary fam filename
     out_fam_fn = fam_fn.with_name(fam_fn.stem + "_temp" + fam_fn.suffix)
