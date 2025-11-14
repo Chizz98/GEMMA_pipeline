@@ -26,12 +26,32 @@ def run_gemma(param_dict: dict) -> None:
         ]
     gemma_cmd = f"gemma {' '.join(gemma_cmd_blocks)}"
     subprocess.run(
-         gemma_cmd, 
-         shell=True, 
-         text=False, 
-         check=True
-         )
+        gemma_cmd, 
+        shell=True, 
+        text=False, 
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+        )
 
+
+def parse_log(log_fn: str) -> list[str]:
+    with open(log_fn) as infile:
+        log_text = infile.read()
+    out_dict = {
+        "phenotype": os.path.basename(log_fn).split(".")[0],
+        "total_ind": re.search(
+             r"total individuals = ([0-9]+)", log_text).groups()[0],
+        "analyzed_ind": re.search(
+             r"analyzed individuals = ([0-9]+)", log_text).groups()[0],
+        "total_var": re.search(
+             r"total SNPs\/var = ([0-9]+)", log_text).groups()[0],
+        "analyzed_var": re.search(
+             r"analyzed SNPs\/var = ([0-9]+)", log_text).groups()[0]
+    }
+    return out_dict
+    
+    
 
 def main(argv = None):
     argv = argv or sys.argv
@@ -39,6 +59,7 @@ def main(argv = None):
             print("Usage: python run_gemma.py <bfiles> <kinship_mat> <maf> "
                   "<missing_threshold> <lmm> <output filename> <phenotype_num>")
             sys.exit(1)
+    
     # Make parameter_dictionary
     gemma_params = {
         "bfile": argv[1],
@@ -53,6 +74,16 @@ def main(argv = None):
     # Run gemma
     run_gemma(gemma_params)
 
+    # Parse log
+    log_out = parse_log(os.path.join("output", gemma_params["o"]) + ".log.txt")
+    print(
+         f'Info: Finished {log_out["phenotype"]}\n'\
+         f'Total individuals:\t{log_out["total_ind"]}\n'\
+         f'Analyzed individuals:\t{log_out["analyzed_ind"]}\n'\
+         f'Variants loaded:\t{log_out["total_var"]}\n'\
+         f'Variants analyzed:"\t{log_out["analyzed_var"]}\n'\
+         )
+    
 
 if __name__ == "__main__":
     main()
