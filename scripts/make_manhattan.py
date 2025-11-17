@@ -25,7 +25,8 @@ def parse_assoc(assoc_fn:str) -> dict:
     out_dict = {
         "chrom_list": [],
         "pos_list": [],
-        "p_vals": []
+        "p_vals": [],
+        "actual_pos": []
     }
 
     # Parse assoc
@@ -54,6 +55,7 @@ def parse_assoc(assoc_fn:str) -> dict:
             out_dict["chrom_list"].append(chrom)
             out_dict["pos_list"].append(pos_cum)
             out_dict["p_vals"].append(p_val)
+            out_dict["actual_pos"].append(pos)
     return out_dict
 
 
@@ -65,6 +67,7 @@ def manhattan_plot(
     chrom_list = assoc_dict["chrom_list"]
     pos_list = assoc_dict["pos_list"]
     p_vals = assoc_dict["p_vals"]
+    actual_pos = np.array(assoc_dict["actual_pos"])
     
     pos_list = np.array(pos_list)
     LOD = -np.log10(np.array(p_vals))
@@ -73,6 +76,7 @@ def manhattan_plot(
     unique_chr = np.unique(plotting_chr)
     plotting_pos = pos_list[LOD > lod_plotting_thresh]
     plotting_lod = LOD[LOD > lod_plotting_thresh]
+    plotting_actual_pos = actual_pos[LOD > lod_plotting_thresh]
     bonf_thresh = -np.log10(0.05 / len(p_vals))
     
     colors = ["#1f77b4", "#ff7f0e"]
@@ -84,6 +88,7 @@ def manhattan_plot(
     for i, contig in enumerate(unique_chr):
         pos_subset = plotting_pos[plotting_chr == contig]
         lod_subset = plotting_lod[plotting_chr == contig]
+        actual_pos_subset = plotting_actual_pos[plotting_chr == contig]
         plt.scatter(
             x = pos_subset, 
             y = lod_subset, 
@@ -93,6 +98,15 @@ def manhattan_plot(
         midpoint = (pos_subset.min() + pos_subset.max()) / 2
         xticks.append(midpoint)
         xlabs.append(contig)
+        
+        # Plot highest lod variant per chr
+        max_ind = np.argmax(lod_subset)
+        top_pos = pos_subset[max_ind]
+        top_actual_pos = actual_pos_subset[max_ind]
+        top_snp_lod = lod_subset[max_ind]
+        plt.text(top_pos, top_snp_lod + 0.05, str(top_actual_pos), fontsize=6, 
+                 rotation=45)
+
     
     plt.axhline(y=bonf_thresh, color="red", linestyle="dashed")
     plt.xticks(xticks, xlabs, rotation=90)
