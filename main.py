@@ -9,6 +9,7 @@ import argparse as arg
 import multiprocessing
 import scripts.merge_fam as merge_fam
 import scripts.run_gemma as run_gemma
+import scripts.make_manhattan as make_manhattan
 import sys
 import os
 import shutil
@@ -62,6 +63,18 @@ def arg_reader():
         default=1
     )
 
+    gemma_options = arg_parser.add_argument_group(
+        title="Visualisation options",
+        description="Options used in visualizing the GWAS results"
+    )
+    gemma_options.add_argument(
+        "-l", "--lod",
+        help="Variants below this LOD score will not be plotted, " \
+        "default = 2",
+        type=float,
+        default=2.0
+    )
+
     arg_parser.add_argument(
         "-p", "--parallel",
         help="Number of parallel processes for GEMMA, default = 1",
@@ -105,7 +118,7 @@ def out_dir_handler(out_dir: str) -> bool:
     return return_val
 
 
-def gemma_worker(gemma_args):
+def gemma_worker(gemma_args: dict) -> None:
     run_gemma.main(
         (
             gemma_args["script"],
@@ -137,6 +150,17 @@ def gemma_worker(gemma_args):
         ]
     for source_fn, dest_fn in zip(source, dest):
         shutil.move(source_fn, dest_fn)
+
+
+def plotting_worker(plotting_args: dict) -> None:
+    make_manhattan.main(
+        (
+            plotting_args["script"],
+            plotting_args["assoc_fn"],
+            plotting_args["out_prefix"],
+            plotting_args["lod_th"]
+        )
+    )
 
 
 def main():
@@ -207,6 +231,29 @@ def main():
     os.rmdir("output")
 
     # Make manhattan plots 
+    lod_th = args.lod
+    plotting_dir = os.path.join(out_dir, "plots")
+    if not os.path.exists(plotting_dir):
+        os.mkdir(plotting_dir)
+    
+    manhattan_arg_list = []
+    assoc_files = [os.path.join(gemma_out_dir, file_name) for file_name in 
+                   os.listdir(gemma_out_dir) if file_name.endswith("assoc.txt")]
+    for assoc_file in assoc_files:
+        out_fn = os.path.basename(assoc_file).replace(
+            ".assoc.txt", ""
+            )
+        out_prefix = os.path.join(plotting_dir, out_fn)
+        manhattan_args = {
+            "script": "make_manhattan.py",
+            "assoc_fn": assoc_file,
+            "out_prefix": out_prefix,
+            "lod_th": lod_th
+        }
+        manhattan_arg_list.append(manhattan_args)
+    with multiprocessing.Pool(num_children) as pool:
+        pool.map(plotting_worker, manhattan_arg_list)
+
 
 
 if __name__ == "__main__":
