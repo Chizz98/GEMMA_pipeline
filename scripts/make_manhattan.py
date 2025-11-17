@@ -101,7 +101,11 @@ def manhattan_plot(
     plt.close()
 
 
-def qqplot(assoc_dict: str, out_fn:str, df:int = 1) -> None:
+def qqplot(
+        assoc_dict: str, 
+        out_fn:str, 
+        df:int = 1, 
+        ) -> None:
     p_vals = np.array(assoc_dict["p_vals"])
     p_vals = p_vals[~np.isnan(p_vals)]
 
@@ -111,15 +115,27 @@ def qqplot(assoc_dict: str, out_fn:str, df:int = 1) -> None:
 
     inflation_factor = calc_inflation(p_vals, df=df)
 
+    median_idx = n // 2
+    median_expected = expected[median_idx]
+    median_observed = observed[median_idx]
+
     plt.figure(figsize=(5, 5))
     plt.scatter(expected, observed, s=6)
 
     # Plot refline from 0 to max on both axes
     maxval = max(expected.max(), observed.max())
-    plt.plot([0, maxval], [0, maxval], color="red", linestyle="--")
+    plt.plot([0, maxval], [0, maxval], color="red", linestyle="--",
+             label="bonferroni threshold")
 
-    plt.xlabel("Expected -log10(p)")
-    plt.ylabel("Observed -log10(p)")
+    # Plot median lines for genomic inflation factor
+    plt.axhline(y=median_observed, color="cyan", linestyle=":", 
+                label="median observed")
+    plt.axvline(x=median_expected, color="magenta", linestyle=":",
+                label="median expected")
+
+    plt.legend(loc="lower right")
+    plt.xlabel("Expected p")
+    plt.ylabel("Observed p")
     plt.text(0.05*maxval, 0.9*maxval, f"λGC = {inflation_factor:.3f}", 
              color="black")
 
