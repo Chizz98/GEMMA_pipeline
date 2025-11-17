@@ -81,7 +81,7 @@ def main(argv = None):
          f'Total individuals:\t{log_out["total_ind"]}\n'\
          f'Analyzed individuals:\t{log_out["analyzed_ind"]}\n'\
          f'Variants loaded:\t{log_out["total_var"]}\n'\
-         f'Variants analyzed:"\t{log_out["analyzed_var"]}\n'\
+         f'Variants analyzed:\t{log_out["analyzed_var"]}\n'\
          )
     
 
