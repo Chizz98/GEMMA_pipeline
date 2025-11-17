@@ -15,7 +15,7 @@ import scipy
 def calc_inflation(p_vals: list, df: int) -> float:
     p_vals = np.array(p_vals)
     p_vals = p_vals[~np.isnan(p_vals)]
-    chi2_stats = scipy.stats.chi2.isf(p_vals, df=1=df)
+    chi2_stats = scipy.stats.chi2.isf(p_vals, df=df)
     expected_median = scipy.stats.chi2.ppf(0.5, df=df)
     genomic_inflation = np.median(chi2_stats) / expected_median
     return genomic_inflation
