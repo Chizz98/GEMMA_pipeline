@@ -139,7 +139,7 @@ def qqplot(
     # Plot refline from 0 to max on both axes
     maxval = max(expected.max(), observed.max())
     plt.plot([0, maxval], [0, maxval], color="red", linestyle="--",
-             label="bonferroni threshold")
+             label="reference line")
 
     # Plot median lines for genomic inflation factor
     plt.axhline(y=median_observed, color="cyan", linestyle=":", 
@@ -148,8 +148,8 @@ def qqplot(
                 label="median expected")
 
     plt.legend(loc="lower right")
-    plt.xlabel("Expected p")
-    plt.ylabel("Observed p")
+    plt.xlabel("Expected -log10(p)")
+    plt.ylabel("Observed -log10(p)")
     plt.text(0.05*maxval, 0.9*maxval, f"λGC = {inflation_factor:.3f}", 
              color="black")
 
