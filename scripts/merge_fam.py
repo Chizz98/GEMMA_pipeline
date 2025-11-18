@@ -41,7 +41,9 @@ def parse_phenotype_file(
                 try:
                     float(phenotype)
                 except ValueError:
-                    if "," in phenotype:
+                    if phenotype == "NA":
+                        pass
+                    elif "," in phenotype:
                         raise Exception(
                             f"Comma in: {phenotype}, for " 
                             f"sample {sample_id} and phenotype "
@@ -99,8 +101,8 @@ def modify_fam(
             sample_descriptors = line[:5]
             sample_id = sample_descriptors[1]
             
-            # -9 is missing phenotype symbol for GEMMA
-            sample_phenotypes = pheno_dict.get(sample_id, ["-9"] * n_pheno)
+            # NA is missing phenotype symbol for GEMMA
+            sample_phenotypes = pheno_dict.get(sample_id, ["NA"] * n_pheno)
             if sample_id not in pheno_dict:
                 print(f"Warning: no phenotypes for {sample_id}")
 
@@ -114,17 +116,19 @@ def modify_fam(
 def main(argv=None):
     argv = argv or sys.argv
     # Parse cmd args
-    if len(argv) != 3:
-            print("Usage: python merge_pheno.py <phenotype_file> <fam_file>")
+    if len(argv) != 4:
+            print("Usage: python merge_pheno.py <phenotype_file> <fam_file> " \
+            "<delim>")
             sys.exit(1)
 
     pheno_fn = pathlib.Path(argv[1])
     fam_fn = pathlib.Path(argv[2])
+    delim = argv[3]
 
     # Construct temporary fam filename
     out_fam_fn = fam_fn.with_name(fam_fn.stem + "_temp" + fam_fn.suffix)
     
-    phenotypes, pheno_dict = parse_phenotype_file(pheno_fn)
+    phenotypes, pheno_dict = parse_phenotype_file(pheno_fn, delim)
     modify_fam(fam_fn, pheno_dict, phenotypes, out_fam_fn)
 
     # Overwrite input fam with temp fam
