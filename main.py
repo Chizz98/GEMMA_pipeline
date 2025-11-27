@@ -87,6 +87,12 @@ def arg_reader():
         type=str,
         default="gemma_pipe_out"
     )
+    arg_parser.add_argument(
+        "-d", "--delim",
+        help=r"Delimiter for phenotype file, default = '\t'",
+        type=str,
+        default="\t"
+    )
     return arg_parser
 
 
@@ -119,18 +125,24 @@ def out_dir_handler(out_dir: str) -> bool:
 
 
 def gemma_worker(gemma_args: dict) -> None:
-    run_gemma.main(
-        (
-            gemma_args["script"],
-            gemma_args["bfiles"],
-            gemma_args["kinship"],
-            gemma_args["maf"],
-            gemma_args["missing"],
-            gemma_args["lmm"],
-            gemma_args["phenotype"],
-            gemma_args["pheno_col"]
+    try:
+        run_gemma.main(
+            (
+                gemma_args["script"],
+                gemma_args["bfiles"],
+                gemma_args["kinship"],
+                gemma_args["maf"],
+                gemma_args["missing"],
+                gemma_args["lmm"],
+                gemma_args["phenotype"],
+                gemma_args["pheno_col"]
+            )
         )
-    )
+    except Exception as e:
+        print(
+            f"Error running GEMMA for phenotype {gemma_args['phenotype']}: {e}"
+            )
+        return
 
     phenotype = gemma_args["phenotype"]
     default_out = "output"
@@ -190,11 +202,13 @@ def main():
     # Merge phenotypes into fam file
     pheno_file = args.phenotype_file
     fam_file = args.bed_files + ".fam"
+    delimiter = args.delim
     phenotypes = merge_fam.main(
         argv=[
             "merge_fam.py", 
             pheno_file, 
-            fam_file
+            fam_file,
+            delimiter
             ]
         )
 
